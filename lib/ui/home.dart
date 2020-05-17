@@ -6,8 +6,24 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-
   var _nameFieldController = new TextEditingController();
+
+  Future _goToNextScreen(BuildContext context) async {
+    Map results = await Navigator.of(context).push(
+      new MaterialPageRoute(builder: (BuildContext context) {
+        return new NextScreen(name: _nameFieldController.text);
+      })
+    );
+
+    if (results != null && results.containsKey('info')) {
+      print(results['info'].toString());
+      _nameFieldController.text = results['info'].toString();
+    }
+    else {
+      print('Nothing');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -19,26 +35,18 @@ class _HomeState extends State<Home> {
           new ListTile(
             title: new TextField(
               controller: _nameFieldController,
-              decoration: new InputDecoration(
-                labelText: 'Enter your name'
-              ),
+              decoration: new InputDecoration(labelText: 'Enter your name'),
             ),
           ),
           new ListTile(
-            title: new RaisedButton(onPressed: () {
-              var router = new MaterialPageRoute(builder: (BuildContext context) {
-                return new NextScreen(name: _nameFieldController.text);
-              });
-              Navigator.of(context).push(router);
-            },
-            child: new Text("Send to next screen"))
-          )
+              title: new RaisedButton(
+                  onPressed: () => _goToNextScreen(context),
+                  child: new Text("Send to next screen")))
         ],
       ),
     );
   }
 }
-
 
 // next screen
 class NextScreen extends StatefulWidget {
@@ -51,15 +59,41 @@ class NextScreen extends StatefulWidget {
 }
 
 class _NextScreenState extends State<NextScreen> {
+  var _backTextFieldController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("Second screen"),
       ),
-      body: new ListTile(
-        title: new Text('${widget.name}'),
+      body: new Container(
+        child: new Column(
+          children: <Widget>[
+            new ListTile(
+              title: new Text('${widget.name}'),
+            ),
+            new ListTile(
+              title: new TextField(
+                controller: _backTextFieldController,
+              ),
+            ),
+            new ListTile(
+              title: new FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context, {
+                      'info': _backTextFieldController.text
+                    });
+                  },
+                  child: new Text("Send data back")),
+            )
+          ],
+        ),
       ),
+
+//      body: new ListTile(
+//        title: new Text('${widget.name}'),
+//      ),
     );
   }
 }
